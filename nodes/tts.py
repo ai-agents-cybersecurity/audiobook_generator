@@ -16,6 +16,10 @@ console = Console()
 
 # Global model loading is handled in tts_mlx
 
+
+def _chapter_tts_chunks(chapter) -> list[str]:
+    return chapter.tts_chunks if chapter.tts_chunks else chapter.chunks
+
 def generate_chapter_audio(
     state: AudiobookState,
     chapter_index: int,
@@ -35,12 +39,13 @@ def generate_chapter_audio(
         Tuple of (output file path, success)
     """
     chapter = state.chapters[chapter_index]
+    tts_chunks = _chapter_tts_chunks(chapter)
 
-    if not chapter.chunks:
+    if not tts_chunks:
         console.print(f"[yellow]Chapter {chapter.number} has no chunks, skipping[/yellow]")
         return None, False
 
-    console.print(f"[blue]Chapter {chapter.number}: {len(chapter.chunks)} chunks to process[/blue]")
+    console.print(f"[blue]Chapter {chapter.number}: {len(tts_chunks)} chunks to process[/blue]")
 
     if not is_mlx_available():
         error_msg = "MLX is not available. Please install mlx-audio."
@@ -60,7 +65,7 @@ def generate_chapter_audio(
     audio_chunks = []
     sr = None
 
-    for i, chunk_text in enumerate(chapter.chunks):
+    for i, chunk_text in enumerate(tts_chunks):
         if not chunk_text.strip():
             continue
 
@@ -79,7 +84,7 @@ def generate_chapter_audio(
             state.processed_chunks += 1
 
             if progress_callback:
-                progress_callback(i + 1, len(chapter.chunks), chunk_text[:50])
+                progress_callback(i + 1, len(tts_chunks), chunk_text[:50])
 
         except Exception as e:
             console.print(f"[red]Chunk {i} error: {str(e)}[/red]")
@@ -186,12 +191,12 @@ def generate_audio(state: AudiobookState) -> AudiobookState:
         # Prepare arguments for parallel execution
         chapter_args = []
         for i, chapter in enumerate(state.chapters):
-            if not chapter.chunks:
+            if not _chapter_tts_chunks(chapter):
                 continue
             chapter_args.append({
                 "chapter_index": i,
                 "chapter_title": chapter.title,
-                "chunks": chapter.chunks,
+                "chunks": _chapter_tts_chunks(chapter),
                 "voice": state.voice,
                 "language": state.language,
                 "output_dir": os.path.join(state.output_dir, "audio"),
@@ -239,10 +244,11 @@ def generate_audio(state: AudiobookState) -> AudiobookState:
             console.print("\n[blue]Running sequential generation...[/blue]")
             for i, chapter in enumerate(state.chapters):
                 state.current_chapter_index = i
+                tts_chunks = _chapter_tts_chunks(chapter)
                 console.print(f"\n[cyan]Processing Chapter {chapter.number}: {chapter.title[:40]}...[/cyan]")
-                console.print(f"  Chunks: {len(chapter.chunks)}")
+                console.print(f"  Chunks: {len(tts_chunks)}")
 
-                if not chapter.chunks:
+                if not tts_chunks:
                     console.print(f"  [yellow]No chunks, skipping[/yellow]")
                     continue
 

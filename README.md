@@ -7,6 +7,7 @@ Convert books to audiobooks using Qwen3-TTS and LangGraph.
 - **Multi-format Support**: RTF, TXT, Markdown, HTML, DOCX
 - **Smart Chapter Detection**: Automatically detects chapter boundaries
 - **Semantic Chunking**: Respects sentence and paragraph boundaries for natural speech
+- **TTS Tagging Preprocess**: Adds Qwen3-TTS delivery tags before synthesis
 - **Quality Verification**: Uses faster-whisper STT to verify audio quality
 - **LangGraph Workflow**: Sophisticated pipeline with QA agents and retry logic
 - **Resumption Support**: Checkpoint-based resumption for interrupted generations
@@ -125,6 +126,12 @@ The generator uses a LangGraph StateGraph with the following stages:
                                                         │
                      ┌──────────────────────────────────┘
                      ▼
+┌───────────────────┐
+│  TTS Preprocess   │
+│ (Qwen3 tags)      │
+└───────────────────┘
+                      │
+                      ▼
 ┌──────────────┐     ┌───────────────────┐     ┌─────────────────┐
 │   Generate   │────▶│     Verify        │────▶│    Audio QA     │
 │ (Qwen3-TTS)  │     │ (faster-whisper)  │     │ (validation)    │
@@ -167,6 +174,13 @@ result = run_audiobook_workflow(
 print(f"Status: {result.stage}")
 print(f"Chapters: {len(result.chapters)}")
 ```
+
+## Qwen3-TTS Tag Configuration
+
+The preprocessing step uses a strict allowlist of Qwen3-TTS tags stored in
+`qwen3_tts_tags.json`. Add your approved tag literals or regex patterns there
+before running the workflow. Tags not in the allowlist are stripped. See
+`QWEN3_TTS_TAGS_PATH` in `.env.audiobook` to override the file location.
 
 ## Troubleshooting
 

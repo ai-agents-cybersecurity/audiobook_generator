@@ -19,6 +19,7 @@ from .nodes.converter import convert_document
 from .nodes.splitter import split_chapters
 from .nodes.cleaner import clean_text
 from .nodes.chunker import chunk_text
+from .nodes.tts_preprocessor import preprocess_tts
 from .nodes.tts import generate_audio
 from .nodes.verifier import verify_audio
 from .qa_agents.conversion_qa import ConversionQAAgent
@@ -93,9 +94,17 @@ def node_chunk(state: AudiobookState) -> AudiobookState:
     return state
 
 
+def node_preprocess_tts(state: AudiobookState) -> AudiobookState:
+    """Preprocess chunks with Qwen3-TTS tags."""
+    console.print("\n[bold blue]Step 5: Preprocessing text for Qwen3-TTS...[/bold blue]")
+    state = preprocess_tts(state)
+    _save_checkpoint(state, "preprocess_tts")
+    return state
+
+
 def node_generate(state: AudiobookState) -> AudiobookState:
     """Generate audio."""
-    console.print("\n[bold blue]Step 5: Generating audio...[/bold blue]")
+    console.print("\n[bold blue]Step 6: Generating audio...[/bold blue]")
     state = generate_audio(state)
     _save_checkpoint(state, "generate")
     return state
@@ -103,7 +112,7 @@ def node_generate(state: AudiobookState) -> AudiobookState:
 
 def node_verify(state: AudiobookState) -> AudiobookState:
     """Verify audio."""
-    console.print("\n[bold blue]Step 6: Verifying audio...[/bold blue]")
+    console.print("\n[bold blue]Step 7: Verifying audio...[/bold blue]")
     state = verify_audio(state)
     _save_checkpoint(state, "verify")
     return state
@@ -210,7 +219,7 @@ def route_after_clean(state: AudiobookState) -> Literal["chunk", "failed"]:
     return "chunk"
 
 
-def route_after_chunk(state: AudiobookState) -> Literal["generate", "failed"]:
+def route_after_chunk(state: AudiobookState) -> Literal["preprocess_tts", "failed"]:
     """Route after chunk step."""
     if state.stage == WorkflowStage.FAILED:
         console.print("[red]Chunking failed - stopping workflow[/red]")
@@ -219,6 +228,13 @@ def route_after_chunk(state: AudiobookState) -> Literal["generate", "failed"]:
         console.print("[red]No chunks created - stopping workflow[/red]")
         state.errors.append("No chunks created from chapters")
         state.stage = WorkflowStage.FAILED
+        return "failed"
+    return "preprocess_tts"
+
+
+def route_after_preprocess_tts(state: AudiobookState) -> Literal["generate", "failed"]:
+    """Route after TTS preprocessing step."""
+    if state.stage == WorkflowStage.FAILED:
         return "failed"
     return "generate"
 
@@ -251,7 +267,7 @@ def build_audiobook_graph() -> StateGraph:
     split -> split_qa -> [clean or retry or fail]
        |
        v
-    clean -> chunk -> generate -> verify -> audio_qa -> [complete or retry or fail]
+    clean -> chunk -> preprocess_tts -> generate -> verify -> audio_qa -> [complete or retry or fail]
        |
        v
     complete (or failed)
@@ -269,6 +285,7 @@ def build_audiobook_graph() -> StateGraph:
     workflow.add_node("split_qa", node_split_qa)
     workflow.add_node("clean", node_clean)
     workflow.add_node("chunk", node_chunk)
+    workflow.add_node("preprocess_tts", node_preprocess_tts)
     workflow.add_node("generate", node_generate)
     workflow.add_node("verify", node_verify)
     workflow.add_node("audio_qa", node_audio_qa)
@@ -322,6 +339,15 @@ def build_audiobook_graph() -> StateGraph:
     workflow.add_conditional_edges(
         "chunk",
         route_after_chunk,
+        {
+            "preprocess_tts": "preprocess_tts",
+            "failed": "failed",
+        }
+    )
+
+    workflow.add_conditional_edges(
+        "preprocess_tts",
+        route_after_preprocess_tts,
         {
             "generate": "generate",
             "failed": "failed",
