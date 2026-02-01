@@ -101,7 +101,8 @@ class Config:
     TTS_CHUNK_SIZE: int = int(os.getenv("TTS_CHUNK_SIZE", "500"))
     TTS_WORKERS: int = int(os.getenv("TTS_WORKERS", "1"))
     TTS_PREPROCESSING_ENABLED: bool = os.getenv("TTS_PREPROCESSING_ENABLED", "true").lower() == "true"
-    QWEN3_TTS_TAGS_PATH: str = os.getenv("QWEN3_TTS_TAGS_PATH", str(Path(__file__).parent / "qwen3_tts_tags.json"))
+    QWEN3_TTS_TAGS_PATH: str = os.getenv("QWEN3_TTS_TAGS_PATH", str(Path(__file__).parent / "qwen3_tts_tags.json"))  # Legacy
+    QWEN3_TTS_CONFIG_PATH: str = os.getenv("QWEN3_TTS_CONFIG_PATH", str(Path(__file__).parent / "qwen3_tts_config.json"))
 
     # QA settings
     MAX_QA_ATTEMPTS: int = int(os.getenv("MAX_QA_ATTEMPTS", "3"))

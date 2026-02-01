@@ -66,6 +66,7 @@ def generate_chunk_audio_mlx(
     text: str,
     speaker: str = "Ryan",
     language: str = "English",
+    instruct: str = "Read in a clear, engaging audiobook narration style.",
 ) -> Tuple[np.ndarray, int]:
     """
     Generate audio for a text chunk using MLX.
@@ -73,9 +74,9 @@ def generate_chunk_audio_mlx(
     Args:
         text: Text to synthesize
         speaker: Speaker name
-        language: Language (ignored for now in this wrapper if model doesn't support explicit setting via this API, 
-                  but Qwen3 usually handles it in prompt or speaker conditioning)
-                  
+        language: Language (e.g., "English", "Chinese")
+        instruct: Natural language instruction for speech style
+                   
     Returns:
         Tuple of (audio waveform, sample rate)
     """
@@ -101,9 +102,6 @@ def generate_chunk_audio_mlx(
     
     full_audio = []
     sr = 24000 # default for Qwen3, but will check result
-    
-    # Default instruction if not provided
-    instruct = "Read in a calm, clear, and engaging audiobook narration style."
 
     try:
         # returns generator

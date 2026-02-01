@@ -570,6 +570,7 @@ def run_chapters_workflow(
     # Add nodes (skip convert and split)
     workflow.add_node("clean", node_clean)
     workflow.add_node("chunk", node_chunk)
+    workflow.add_node("preprocess_tts", node_preprocess_tts)
     workflow.add_node("generate", node_generate)
     workflow.add_node("verify", node_verify)
     workflow.add_node("audio_qa", node_audio_qa)
@@ -588,6 +589,11 @@ def run_chapters_workflow(
     workflow.add_conditional_edges(
         "chunk",
         route_after_chunk,
+        {"preprocess_tts": "preprocess_tts", "failed": "failed"}
+    )
+    workflow.add_conditional_edges(
+        "preprocess_tts",
+        route_after_preprocess_tts,
         {"generate": "generate", "failed": "failed"}
     )
     workflow.add_conditional_edges(

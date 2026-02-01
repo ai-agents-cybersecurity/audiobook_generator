@@ -1,0 +1,31 @@
+{
+    "default_instruct": "Read in a clear, engaging audiobook narration style.",
+    "scene_instructions": {
+        "dialogue": "Speak naturally as if in conversation, with appropriate emotion and character voice.",
+        "action": "Read with energy, pace, and urgency to convey the excitement.",
+        "reflection": "Read slowly and thoughtfully with a contemplative, introspective tone.",
+        "narration": "Read in a clear, engaging audiobook narration style.",
+        "description": "Read descriptively, painting the scene with your voice.",
+        "technical": "Read clearly and precisely, ensuring comprehension.",
+        "emotional": "Read with feeling, conveying the emotional weight of the passage."
+    },
+    "emotion_modifiers": {
+        "angry": "with anger and frustration in your voice",
+        "sad": "with sadness and a somber, melancholy tone",
+        "excited": "with excitement and enthusiasm",
+        "fearful": "with tension and anxiety, as if something threatening looms",
+        "joyful": "with warmth and happiness",
+        "tense": "with underlying tension and suspense",
+        "calm": "in a calm, steady, reassuring manner",
+        "mysterious": "with an air of mystery and intrigue"
+    },
+    "character_voice_hints": {
+        "male_young": "as a young man",
+        "male_old": "as an older, weathered man",
+        "female_young": "as a young woman",
+        "female_old": "as a mature woman",
+        "child": "as a child with youthful energy",
+        "authority": "with authority and command",
+        "meek": "softly and hesitantly"
+    }
+}

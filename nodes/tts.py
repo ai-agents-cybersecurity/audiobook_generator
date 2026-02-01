@@ -9,7 +9,7 @@ import numpy as np
 import soundfile as sf
 from rich.console import Console
 
-from ..state import AudiobookState, WorkflowStage
+from ..state import AudiobookState, WorkflowStage, TTSChunk
 from .tts_mlx import load_mlx_model, is_mlx_available, generate_chunk_audio_mlx
 
 console = Console()
@@ -17,8 +17,13 @@ console = Console()
 # Global model loading is handled in tts_mlx
 
 
-def _chapter_tts_chunks(chapter) -> list[str]:
-    return chapter.tts_chunks if chapter.tts_chunks else chapter.chunks
+def _chapter_tts_chunks(chapter) -> list[TTSChunk]:
+    """Get TTS chunks, falling back to plain text chunks with default instruct."""
+    if chapter.tts_chunks:
+        return chapter.tts_chunks
+    # Fallback: wrap plain text chunks in TTSChunk with default instruct
+    default_instruct = "Read in a clear, engaging audiobook narration style."
+    return [TTSChunk(text=chunk, instruct=default_instruct) for chunk in chapter.chunks]
 
 def generate_chapter_audio(
     state: AudiobookState,
@@ -65,15 +70,16 @@ def generate_chapter_audio(
     audio_chunks = []
     sr = None
 
-    for i, chunk_text in enumerate(tts_chunks):
-        if not chunk_text.strip():
+    for i, tts_chunk in enumerate(tts_chunks):
+        if not tts_chunk.text.strip():
             continue
 
         try:
             audio, sample_rate = generate_chunk_audio_mlx(
-                text=chunk_text,
+                text=tts_chunk.text,
                 speaker=state.voice,
                 language=state.language,
+                instruct=tts_chunk.instruct,
             )
             
             audio_chunks.append(audio)
@@ -84,7 +90,7 @@ def generate_chapter_audio(
             state.processed_chunks += 1
 
             if progress_callback:
-                progress_callback(i + 1, len(tts_chunks), chunk_text[:50])
+                progress_callback(i + 1, len(tts_chunks), tts_chunk.text[:50])
 
         except Exception as e:
             console.print(f"[red]Chunk {i} error: {str(e)}[/red]")
@@ -308,12 +314,21 @@ def generate_chapter_worker(args: dict) -> tuple[Optional[str], bool, Optional[s
         # Create a local console for the worker
         console = Console()
         
-        for i, chunk_text in enumerate(chunks):
+        for i, tts_chunk in enumerate(chunks):
             # Print progress every 10 chunks or for the first few
             if i % 10 == 0 or i < 5:
                 # Calculate percent
                 pct = (i / len(chunks)) * 100
                 console.print(f"[dim]Chapter {chapter_number}: Processing chunk {i+1}/{len(chunks)} ({pct:.1f}%)[/dim]")
+
+            # Handle both TTSChunk objects and legacy string chunks
+            if hasattr(tts_chunk, 'text'):
+                chunk_text = tts_chunk.text
+                chunk_instruct = tts_chunk.instruct
+            else:
+                # Legacy: plain string
+                chunk_text = tts_chunk
+                chunk_instruct = "Read in a clear, engaging audiobook narration style."
 
             if not chunk_text.strip():
                 continue
@@ -321,7 +336,8 @@ def generate_chapter_worker(args: dict) -> tuple[Optional[str], bool, Optional[s
             audio, sample_rate = generate_chunk_audio_mlx(
                 text=chunk_text,
                 speaker=voice,
-                language=language
+                language=language,
+                instruct=chunk_instruct,
             )
             
             audio_chunks.append(audio)
