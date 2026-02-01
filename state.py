@@ -18,6 +18,7 @@ class WorkflowStage(str, Enum):
     SPLIT_QA = "split_qa"
     CLEANING = "cleaning"
     CHUNKING = "chunking"
+    PREPROCESSING = "preprocessing"
     GENERATING = "generating"
     VERIFYING = "verifying"
     AUDIO_QA = "audio_qa"
@@ -33,6 +34,7 @@ class Chapter:
     content: str
     cleaned_content: Optional[str] = None
     chunks: list[str] = field(default_factory=list)
+    tts_chunks: list[str] = field(default_factory=list)
     audio_file: Optional[str] = None
     verified: bool = False
     verification_score: float = 0.0
@@ -51,10 +53,12 @@ class Chapter:
             d["content"] = self.content
             d["cleaned_content"] = self.cleaned_content
             d["chunks"] = self.chunks
+            d["tts_chunks"] = self.tts_chunks
         else:
             d["content_length"] = len(self.content) if self.content else 0
             d["cleaned_content_length"] = len(self.cleaned_content) if self.cleaned_content else 0
             d["num_chunks"] = len(self.chunks)
+            d["num_tts_chunks"] = len(self.tts_chunks)
         return d
 
     @classmethod
@@ -66,6 +70,7 @@ class Chapter:
             content=d.get("content", ""),
             cleaned_content=d.get("cleaned_content"),
             chunks=d.get("chunks", []),
+            tts_chunks=d.get("tts_chunks", []),
             audio_file=d.get("audio_file"),
             verified=d.get("verified", False),
             verification_score=d.get("verification_score", 0.0),
