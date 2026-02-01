@@ -1,0 +1,32 @@
+# User requested ignores
+audiobook_output_mybook/
+mybook/
+round1/
+
+# Python defaults
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Distribution / Builds
+dist/
+build/
+*.egg-info/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Output directories (general pattern)
+audiobook_output*/
+checkpoints/

@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "audiobook-generator"
+version = "0.1.0"
+description = "Convert books to audiobooks using Qwen3-TTS and LangGraph"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Audiobook Generator"},
+]
+keywords = ["tts", "audiobook", "qwen", "langgraph", "text-to-speech"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "langchain>=0.3.0",
+    "langgraph>=0.2.0",
+    "langchain-ollama>=0.2.0",
+    "striprtf>=0.0.26",
+    "markdownify>=0.14.1",
+    "python-docx>=1.1.2",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=5.0.0",
+    "soundfile>=0.12.0",
+    "librosa>=0.10.0",
+    "numpy>=1.26.0",
+    "scipy>=1.14.0",
+    "faster-whisper>=1.0.0",
+    "typer>=0.12.0",
+    "rich>=13.9.0",
+    "tqdm>=4.66.0",
+    "pydantic>=2.9.0",
+    "qwen-tts",
+    "torch>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.0.0",
+]
+
+[project.scripts]
+audiobook-generator = "audiobook_generator.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["audiobook_generator*"]

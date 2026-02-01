@@ -1,0 +1,43 @@
+# ============================================================
+# Audiobook Generator - Requirements
+# ============================================================
+# Install with: pip install -r requirements_audiobook.txt
+# ============================================================
+
+# --- LangChain & LangGraph (workflow orchestration) ---
+langchain>=0.3.0
+langgraph>=0.2.0
+langchain-ollama>=0.2.0
+langchain-core>=0.3.0
+
+# --- Document Processing ---
+striprtf>=0.0.26          # RTF to text conversion
+markdownify>=0.14.1       # HTML to markdown
+python-docx>=1.1.2        # DOCX support
+beautifulsoup4>=4.12.0    # HTML parsing
+lxml>=5.0.0               # XML/HTML parser backend
+
+# --- Audio Processing ---
+soundfile>=0.12.0         # Audio file I/O
+librosa>=0.10.0           # Audio analysis
+numpy>=1.26.0             # Numerical operations
+scipy>=1.14.0             # Signal processing
+
+# --- Speech-to-Text (verification) ---
+faster-whisper>=1.0.0     # Fast Whisper STT
+
+# --- CLI & Display ---
+typer>=0.12.0             # CLI framework
+rich>=13.9.0              # Rich terminal output
+tqdm>=4.66.0              # Progress bars
+
+# --- Configuration & State ---
+pydantic>=2.9.0           # Data validation
+python-dotenv>=1.0.0      # Environment file loading
+
+# --- PyTorch (for TTS and STT) ---
+torch>=2.0.0              # Deep learning framework
+
+# --- Qwen TTS (install from parent directory) ---
+# Run: pip install -e ..
+# Or: pip install qwen-tts
